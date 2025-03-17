@@ -39,3 +39,9 @@ fn main() {
     }
 }
 ```
+
+Add to your project by adding this to your Cargo.toml:
+```rust
+[dependencies]
+urandom = { git = "https://github.com/Webbopwork/dogs-rust.git" }
+```
