@@ -8,7 +8,7 @@ fn main() {
     println!("Introducing...");
 
     let server_addr = SocketAddr::from(([127, 0, 0, 1], dogs::Dog::SERVER_PORT));
-    match client.introduce_empty(server_addr) {
+    match client.introduce(server_addr, dogs::BarkCode::empty()) {
         Ok(data) => println!("Introduced!\nGot following data: {:#?}", data),
         Err(e) => println!("Error: {}", e)
     }
