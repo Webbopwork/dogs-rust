@@ -1,5 +1,5 @@
 # dogs-rust
-UdpSocket networking library with handshake(or bark)
+UdpSocket networking library with handshake(or bark) that inegrates 5 bools.
 
 Dogs don't shake hands like we do, they bark.
 
