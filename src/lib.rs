@@ -47,21 +47,21 @@ impl BarkCode {
         Ok(Self::new_clumped(
             if buffer[0] == Self::ENCODING.0.0 {true}
             else if buffer[0] == Self::ENCODING.0.1 {false}
-            else {return Err(error::thow_error("Bark buffer index 0 faulty."))},
+            else {return Err(error::throw_error("Bark buffer index 0 faulty."))},
 
             if buffer[1] == Self::ENCODING.1.0 {(true, true)}
             else if buffer[1] == Self::ENCODING.1.1 {(false, false)}
             else if buffer[1] == Self::ENCODING.1.2 {(true, false)}
             else if buffer[1] == Self::ENCODING.1.3 {(false, true)}
-            else {return Err(error::thow_error("Bark buffer index 1 faulty."))},
+            else {return Err(error::throw_error("Bark buffer index 1 faulty."))},
 
             if buffer[2] == Self::ENCODING.2.0 {true}
             else if buffer[2] == Self::ENCODING.2.1 {false}
-            else {return Err(error::thow_error("Bark buffer index 2 faulty."))},
+            else {return Err(error::throw_error("Bark buffer index 2 faulty."))},
 
             if buffer[3] == Self::ENCODING.3.0 {true}
             else if buffer[3] == Self::ENCODING.3.1 {false}
-            else {return Err(error::thow_error("Bark buffer index 3 faulty."))}
+            else {return Err(error::throw_error("Bark buffer index 3 faulty."))}
         ))
     }
 
