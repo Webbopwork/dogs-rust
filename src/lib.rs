@@ -82,6 +82,10 @@ impl BarkCode {
     pub fn strip_from_data(data: &[u8]) -> &[u8] {
         &data[4..]
     }
+
+    pub fn data_buffer(size: usize) -> Box<[u8]> {
+        vec![0u8; 4+size].into_boxed_slice()
+    }
 }
 
 impl std::fmt::Debug for BarkCode {
@@ -148,5 +152,11 @@ impl Dog {
     pub fn introduce_peek<A: ToSocketAddrs>(&self, addr: A, code: BarkCode) -> io::Result<(usize, SocketAddr, BarkCode)> {
         self.identify(addr, code)?;
         self.bark_peek_listen()
+    }
+
+    pub fn get_data(&self, size: usize) -> io::Result<(Vec<u8>, usize, SocketAddr)> {
+        let mut data = BarkCode::data_buffer(size);
+        let (buf_size, addr) = self.socket.recv_from(&mut data)?;
+        Ok((BarkCode::strip_from_data(&data).to_owned(), buf_size, addr))
     }
 }
