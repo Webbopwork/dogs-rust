@@ -4,15 +4,15 @@ use std::io;
 mod error; 
 
 pub struct BarkCode {
-    opt1: bool,
-    opt2: bool,
-    opt3: bool,
-    opt4: bool,
-    opt5: bool
+    pub opt1: bool,
+    pub opt2: bool,
+    pub opt3: bool,
+    pub opt4: bool,
+    pub opt5: bool
 }
 
 pub struct Dog {
-    socket: UdpSocket
+    pub socket: UdpSocket
 }
 
 impl BarkCode {
