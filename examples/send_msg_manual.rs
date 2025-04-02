@@ -20,7 +20,11 @@ fn process(dog: &dogs::Dog, server_addr: SocketAddr) -> std::io::Result<()> {
     
     dog.identify_with_data(server_addr, code, b"no")?;
     let (_size, _server_addr, _code) = dog.bark_peek_listen()?;
-    let (msg_data, _size, _addr) = dog.get_data(2)?;
+
+    let mut data: [u8; 6] = [0u8; 6];
+    dog.socket.recv_from(&mut data)?;
+
+    let msg_data = dogs::BarkCode::strip_from_data(&data);
 
     println!("\nGot UTF-8 message: {:#?}\n", std::str::from_utf8(&msg_data).expect("Couldn't make data into utf-8."));
 
