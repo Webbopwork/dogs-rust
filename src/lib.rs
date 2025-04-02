@@ -4,15 +4,15 @@ use std::io;
 mod error; 
 
 pub struct BarkCode {
-    pub opt1: bool,
-    pub opt2: bool,
-    pub opt3: bool,
-    pub opt4: bool,
-    pub opt5: bool
+    opt1: bool,
+    opt2: bool,
+    opt3: bool,
+    opt4: bool,
+    opt5: bool
 }
 
 pub struct Dog {
-    pub socket: UdpSocket
+    socket: UdpSocket
 }
 
 impl BarkCode {
@@ -82,7 +82,7 @@ impl BarkCode {
 
 impl std::fmt::Debug for BarkCode {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_tuple("")
+        f.debug_tuple("BarkCode")
             .field(&self.opt1)
             .field(&self.opt2)
             .field(&self.opt3)
@@ -113,8 +113,20 @@ impl Dog {
         Ok((byte_count, src_addr, BarkCode::decode(bark_buf)?))
     }
 
+    pub fn bark_peek_listen(&self) -> io::Result<(usize, SocketAddr, BarkCode)> {
+        let mut bark_buf: [u8; 4] = [0u8; 4];
+        let (byte_count, src_addr) = self.socket.peek_from(&mut bark_buf)?;
+        Ok((byte_count, src_addr, BarkCode::decode(bark_buf)?))
+    }
+
     pub fn bark_respond(&self, code: BarkCode) -> io::Result<(usize, SocketAddr, BarkCode)> {
         let (size, addr, options) = self.bark_listen()?;
+        self.identify(addr, code)?;
+        Ok((size, addr, options))
+    }
+
+    pub fn bark_peek_respond(&self, code: BarkCode) -> io::Result<(usize, SocketAddr, BarkCode)> {
+        let (size, addr, options) = self.bark_peek_listen()?;
         self.identify(addr, code)?;
         Ok((size, addr, options))
     }
@@ -122,5 +134,10 @@ impl Dog {
     pub fn introduce<A: ToSocketAddrs>(&self, addr: A, code: BarkCode) -> io::Result<(usize, SocketAddr, BarkCode)> {
         self.identify(addr, code)?;
         self.bark_listen()
+    }
+
+    pub fn introduce_peek<A: ToSocketAddrs>(&self, addr: A, code: BarkCode) -> io::Result<(usize, SocketAddr, BarkCode)> {
+        self.identify(addr, code)?;
+        self.bark_peek_listen()
     }
 }
