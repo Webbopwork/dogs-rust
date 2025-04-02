@@ -78,6 +78,10 @@ impl BarkCode {
             if self.opt5 {Self::ENCODING.3.0} else {Self::ENCODING.3.1}
         ]
     }
+
+    pub fn strip_from_data(data: &[u8]) -> &[u8] {
+        &data[4..]
+    }
 }
 
 impl std::fmt::Debug for BarkCode {
@@ -104,6 +108,11 @@ impl Dog {
 
     pub fn identify<A: ToSocketAddrs>(&self, addr: A, code: BarkCode) -> io::Result<()> {
         self.socket.send_to(&code.encode(), addr)?;
+        Ok(())
+    }
+
+    pub fn identify_with_data<A: ToSocketAddrs>(&self, addr: A, code: BarkCode, data: &[u8]) -> io::Result<()> {
+        self.socket.send_to(&[&code.encode()[..], data].concat(), addr)?;
         Ok(())
     }
 
