@@ -40,6 +40,8 @@ fn main() {
 }
 ```
 
+For more advanced examples [look here!](https://github.com/Webbopwork/dogs-rust/tree/main/examples)
+
 Add to your project by adding this to your Cargo.toml:
 ```rust
 [dependencies]
