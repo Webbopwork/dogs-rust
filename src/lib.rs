@@ -15,6 +15,10 @@ pub struct Dog {
     pub socket: UdpSocket
 }
 
+pub struct ConnectedDog {
+    pub socket: UdpSocket
+}
+
 impl BarkCode {
     // ((b, B), (a, A, o, O), (r, R), (k, K))
     pub const ENCODING: ((u8, u8), (u8, u8, u8, u8), (u8, u8), (u8, u8)) = ((98, 66), (97, 65, 111, 79), (114, 82), (107, 75));
@@ -110,14 +114,12 @@ impl Dog {
         })
     }
 
-    pub fn identify<A: ToSocketAddrs>(&self, addr: A, code: BarkCode) -> io::Result<()> {
-        self.socket.send_to(&code.encode(), addr)?;
-        Ok(())
+    pub fn identify<A: ToSocketAddrs>(&self, addr: A, code: BarkCode) -> io::Result<usize> {
+        self.socket.send_to(&code.encode(), addr)
     }
 
-    pub fn identify_with_data<A: ToSocketAddrs>(&self, addr: A, code: BarkCode, data: &[u8]) -> io::Result<()> {
-        self.socket.send_to(&[&code.encode()[..], data].concat(), addr)?;
-        Ok(())
+    pub fn identify_with_data<A: ToSocketAddrs>(&self, addr: A, code: BarkCode, data: &[u8]) -> io::Result<usize> {
+        self.socket.send_to(&[&code.encode()[..], data].concat(), addr)
     }
 
     pub fn bark_listen(&self) -> io::Result<(usize, SocketAddr, BarkCode)> {
@@ -158,5 +160,93 @@ impl Dog {
         let mut data = BarkCode::data_buffer(size);
         let (buf_size, addr) = self.socket.recv_from(&mut data)?;
         Ok((BarkCode::strip_from_data(&data).to_owned(), buf_size, addr))
+    }
+
+    pub fn peek_data(&self, size: usize) -> io::Result<(Vec<u8>, usize, SocketAddr)> {
+        let mut data = BarkCode::data_buffer(size);
+        let (buf_size, addr) = self.socket.peek_from(&mut data)?;
+        Ok((BarkCode::strip_from_data(&data).to_owned(), buf_size, addr))
+    }
+}
+
+impl ConnectedDog {
+    pub fn new<A: ToSocketAddrs>(addr: A) -> io::Result<Self> {
+        Ok(Self {
+            socket: UdpSocket::bind(addr)?
+        })
+    }
+
+    pub fn connect<A: ToSocketAddrs>(&self, addr: A) -> io::Result<()> {
+        self.socket.connect(addr)
+    }
+
+    pub fn identify(&self, code: BarkCode) -> io::Result<usize> {
+        self.socket.send(&code.encode())
+    }
+
+    pub fn identify_with_data(&self, code: BarkCode, data: &[u8]) -> io::Result<usize> {
+        self.socket.send(&[&code.encode()[..], data].concat())
+    }
+
+    pub fn bark_listen(&self) -> io::Result<(usize, BarkCode)> {
+        let mut bark_buf: [u8; 4] = [0u8; 4];
+        let byte_count = self.socket.recv(&mut bark_buf)?;
+        Ok((byte_count, BarkCode::decode(bark_buf)?))
+    }
+
+    pub fn bark_peek_listen(&self) -> io::Result<(usize, BarkCode)> {
+        let mut bark_buf: [u8; 4] = [0u8; 4];
+        let byte_count = self.socket.peek(&mut bark_buf)?;
+        Ok((byte_count, BarkCode::decode(bark_buf)?))
+    }
+
+    pub fn bark_respond(&self, code: BarkCode) -> io::Result<(usize, BarkCode)> {
+        let (size, options) = self.bark_listen()?;
+        self.identify(code)?;
+        Ok((size, options))
+    }
+
+    pub fn bark_peek_respond(&self, code: BarkCode) -> io::Result<(usize, BarkCode)> {
+        let (size, options) = self.bark_peek_listen()?;
+        self.identify(code)?;
+        Ok((size, options))
+    }
+
+    pub fn introduce(&self, code: BarkCode) -> io::Result<(usize, BarkCode)> {
+        self.identify(code)?;
+        self.bark_listen()
+    }
+
+    pub fn introduce_peek(&self, code: BarkCode) -> io::Result<(usize, BarkCode)> {
+        self.identify(code)?;
+        self.bark_peek_listen()
+    }
+
+    pub fn get_data(&self, size: usize) -> io::Result<(Vec<u8>, usize)> {
+        let mut data = BarkCode::data_buffer(size);
+        let buf_size = self.socket.recv(&mut data)?;
+        Ok((BarkCode::strip_from_data(&data).to_owned(), buf_size))
+    }
+
+    pub fn peek_data(&self, size: usize) -> io::Result<(Vec<u8>, usize)> {
+        let mut data = BarkCode::data_buffer(size);
+        let buf_size = self.socket.peek(&mut data)?;
+        Ok((BarkCode::strip_from_data(&data).to_owned(), buf_size))
+    }
+}
+
+impl From<Dog> for ConnectedDog {
+    fn from(dog: Dog) -> ConnectedDog {
+        ConnectedDog {
+            socket: dog.socket
+        }
+    }
+}
+
+impl From<ConnectedDog> for Dog {
+    fn from(connected_dog: ConnectedDog) -> Dog {
+        Dog {
+            socket: connected_dog.socket
+        }
     }
 }
