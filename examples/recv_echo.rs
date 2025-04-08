@@ -15,7 +15,7 @@ fn main() {
     }
 }
 
-fn process(dog: &dogs::Dog) -> std::io::Result<()> {
+fn process(dog: &dogs::Dog) -> std::io::Result<usize> {
     let (_size, client_addr, code) = dog.bark_listen()?;
     dog.identify(client_addr, code)
 }
