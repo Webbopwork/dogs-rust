@@ -87,6 +87,10 @@ impl BarkCode {
         &data[4..]
     }
 
+    pub fn strip_from_data_extra_bytes(data: &[u8], extra_bytes: usize) -> &[u8] {
+        &data[4+extra_bytes..]
+    }
+
     pub fn data_buffer(size: usize) -> Box<[u8]> {
         vec![0u8; 4+size].into_boxed_slice()
     }
@@ -101,6 +105,21 @@ impl std::fmt::Debug for BarkCode {
             .field(&self.opt4)
             .field(&self.opt5)
             .finish()
+    }
+}
+
+impl std::ops::Index<usize> for BarkCode {
+    type Output = bool;
+
+    fn index(&self, index: usize) -> &Self::Output {
+        match index {
+            0 => &self.opt1,
+            1 => &self.opt2,
+            2 => &self.opt3,
+            3 => &self.opt4,
+            4 => &self.opt5,
+            _ => panic!("Index outside of valid range 0 to 4")
+        }
     }
 }
 
@@ -167,6 +186,18 @@ impl Dog {
         let (buf_size, addr) = self.socket.peek_from(&mut data)?;
         Ok((BarkCode::strip_from_data(&data).to_owned(), buf_size, addr))
     }
+
+    pub fn get_data_skip(&self, size: usize, skip: usize) -> io::Result<(Vec<u8>, usize, SocketAddr)> {
+        let mut data = BarkCode::data_buffer(size);
+        let (buf_size, addr) = self.socket.recv_from(&mut data)?;
+        Ok((BarkCode::strip_from_data_extra_bytes(&data, skip).to_owned(), buf_size, addr))
+    }
+
+    pub fn peek_data_skip(&self, size: usize, skip: usize) -> io::Result<(Vec<u8>, usize, SocketAddr)> {
+        let mut data = BarkCode::data_buffer(size);
+        let (buf_size, addr) = self.socket.peek_from(&mut data)?;
+        Ok((BarkCode::strip_from_data_extra_bytes(&data, skip).to_owned(), buf_size, addr))
+    }
 }
 
 impl ConnectedDog {
@@ -232,6 +263,18 @@ impl ConnectedDog {
         let mut data = BarkCode::data_buffer(size);
         let buf_size = self.socket.peek(&mut data)?;
         Ok((BarkCode::strip_from_data(&data).to_owned(), buf_size))
+    }
+
+    pub fn get_data_skip(&self, size: usize, skip: usize) -> io::Result<(Vec<u8>, usize)> {
+        let mut data = BarkCode::data_buffer(size);
+        let buf_size = self.socket.recv(&mut data)?;
+        Ok((BarkCode::strip_from_data_extra_bytes(&data, skip).to_owned(), buf_size))
+    }
+
+    pub fn peek_data_skip(&self, size: usize, skip: usize) -> io::Result<(Vec<u8>, usize)> {
+        let mut data = BarkCode::data_buffer(size);
+        let buf_size = self.socket.peek(&mut data)?;
+        Ok((BarkCode::strip_from_data_extra_bytes(&data, skip).to_owned(), buf_size))
     }
 }
 
