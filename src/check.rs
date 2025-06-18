@@ -94,7 +94,6 @@ impl DataCheck {
 
     pub fn add_checker_duo(data: &[u8]) -> Vec<u8> {
         let hash_bytes = &Self::as_le_bytes(&data)[..];
-        println!("Data length: {}\nHash length: {}\nTotal size: {}", data.len(), hash_bytes.len(), [hash_bytes, hash_bytes, data].concat().len());
         [hash_bytes, hash_bytes, data].concat().to_owned()
     }
 
