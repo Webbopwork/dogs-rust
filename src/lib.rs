@@ -1,7 +1,9 @@
 use std::net::{UdpSocket, SocketAddr, ToSocketAddrs};
 use std::io;
 
-mod error; 
+mod error;
+
+pub mod check;
 
 pub struct BarkCode {
     pub opt1: bool,
