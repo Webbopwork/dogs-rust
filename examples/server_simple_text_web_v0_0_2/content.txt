@@ -1,0 +1,5 @@
+Hello!
+
+This is a very early test for the DOGS web.
+
+Currently only text is transfered with this standard, limited to the request size of a BARK packet's free data space with two 8-bit hashes included.
