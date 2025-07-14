@@ -5,7 +5,7 @@ use std::io;
 use std::str::FromStr;
 
 fn main() {
-    let client_addr = SocketAddr::from(([127, 0, 0, 1], dogs::Dog::CLIENT_PORT));
+    let client_addr = SocketAddr::from(([0, 0, 0, 0], dogs::Dog::CLIENT_PORT));
 
     let client = dogs::ConnectedDog::new(client_addr).unwrap();
 

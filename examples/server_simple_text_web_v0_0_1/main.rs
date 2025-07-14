@@ -2,7 +2,7 @@ use dogs;
 use std::net::SocketAddr;
 
 fn main() {
-    let server_addr = SocketAddr::from(([127, 0, 0, 1], dogs::Dog::SERVER_PORT));
+    let server_addr = SocketAddr::from(([0, 0, 0, 0], dogs::Dog::SERVER_PORT));
     let server = dogs::Dog::new(server_addr).unwrap();
 
     println!("Listening for connection...");
